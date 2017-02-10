@@ -38,7 +38,7 @@ int main(void)
     exit(1);
   }
  
-  if ((fd=open("file_writeread.txt",O_RDONLY,0666))<0) {
+  if ((fd=open("file_writeread",O_RDONLY,0666))<0) {
     perror("Error opening file");
     exit(1);
   }

@@ -21,7 +21,7 @@ int main(void)
   }
   
   while ( (n=read(0,buff,sizeof(buff))) > 0)
-      write(1,buff,n);
+      write(fd,buff,n);
 
 // if read returned -1 display an error message    
   if (n<0)

@@ -42,7 +42,7 @@ int main(int argc, char *argv[]){
   
   while (dirp) {
     if ((dp = readdir(dirp)) != NULL) {
-      if (strcmp(dp->d_name, "file_writeread.txt") == 0) {
+      if (strcmp(dp->d_name, file_writeread.txt) == 0) {
         closedir(dirp);
         return 0;
       } else {

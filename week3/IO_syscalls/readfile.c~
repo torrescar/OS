@@ -13,7 +13,7 @@ int main()
   int fd,n;
   char buf[N];
   
-  if ((fd=open("file_read.txt",O_RDONLY,0666))<0) {
+  if ((fd=open("file_read.txt",O_WRONLY,0666))<0) {
     perror("Error opening file");
     exit(1);
   }
