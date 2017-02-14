@@ -7,8 +7,34 @@
 
 int main(int argc, char *argv[])
 {
-	
+	DIR *dirp;
+	struct dirent *dp;
+	int fd;
+	char buf[1024];
 
-	return 0;
+	if(argc < 2)
+	{
+		if((dirp=opendir(getcwd(buf, 1024))) == NULL) {
+			perror("couldn't open directory");
+			return -1;
+		}
+	}
+	else {
+		if((dirp=opendir(argv[1])) == NULL) {
+			perror("couldn't open directory");
+			return -1;
+		}
+	}
+	
+	
+	  while (dirp) {
+   		 if ((dp = readdir(dirp)) != NULL) {
+        		printf("%s\n",dp->d_name);
+      		 } else {
+         		closedir(dirp);
+         		return -1;
+      		 }
+         }
+ 	 return 0;
 }
 
