@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
 	struct dirent *dp;
 	int fd;
 	char buf[PATH_MAX];
-	off_t fileSize;
+	int fileSize;
 
 	if((dirp=opendir(getcwd(buf, PATH_MAX))) == NULL) {
 		perror("couldn't open directory");
@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
   			}
 			
 
-		        if((fileSize=lseek(fd,0,SEEK_END)) < ((off_t) 0)) {
+		        if((fileSize=lseek(fd,0,SEEK_END)) < 0) {
 
      				perror("seek error");
      				return -1;

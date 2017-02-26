@@ -9,7 +9,6 @@ int main(int argc, char *argv[])
 {
 	DIR *dirp;
 	struct dirent *dp;
-	int fd;
 	char buf[PATH_MAX];
 
 	if(argc < 2)
