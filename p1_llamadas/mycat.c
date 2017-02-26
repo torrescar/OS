@@ -22,9 +22,9 @@ int main(int argc, char *argv[])
     		perror("Error opening file");
   		return -1;
 	}
-        while ((n=read(fd,buf,1))>0)
+        while ((n=read(fd,buf,BUFFER_SIZE))>0)
   	{
-		write(STDOUT_FILENO, buf, 1);
+		write(STDOUT_FILENO, buf, n);
 	}
 	if (n<0) {
     		perror("Read error occured");

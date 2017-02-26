@@ -10,11 +10,11 @@ int main(int argc, char *argv[])
 	DIR *dirp;
 	struct dirent *dp;
 	int fd;
-	char buf[1024];
+	char buf[PATH_MAX];
 
 	if(argc < 2)
 	{
-		if((dirp=opendir(getcwd(buf, 1024))) == NULL) {
+		if((dirp=opendir(getcwd(buf, PATH_MAX))) == NULL) {
 			perror("couldn't open directory");
 			return -1;
 		}

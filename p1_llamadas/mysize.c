@@ -11,17 +11,18 @@ int main(int argc, char *argv[])
 	DIR *dirp;
 	struct dirent *dp;
 	int fd;
-	char buf[1024];
-	int fileSize;
+	char buf[PATH_MAX];
+	off_t fileSize;
 
-	if((dirp=opendir(getcwd(buf, 1024))) == NULL) {
+	if((dirp=opendir(getcwd(buf, PATH_MAX))) == NULL) {
 		perror("couldn't open directory");
 		return -1;
 	}
 	
 	while (dirp) {
-   		if ((dp = readdir(dirp)) != NULL && (dp->d_type == DT_REG))
-			printf("here?");  
+   		if ((dp = readdir(dirp)) != NULL){  
+			if (dp->d_type != DT_REG)
+				continue;		
 			if ( (fd= open(dp->d_name, O_RDONLY, 0666))<0)
  		  	{
     				perror("Error creating the file");
@@ -29,18 +30,17 @@ int main(int argc, char *argv[])
   			}
 			
 
-		        if((fileSize=lseek(fd,0,SEEK_END)) < 0) {
+		        if((fileSize=lseek(fd,0,SEEK_END)) < ((off_t) 0)) {
+
      				perror("seek error");
      				return -1;
   			}
         		printf("%s\t%d\n",dp->d_name,fileSize);
 			
       		} else {
-			printf("or here?");
          		closedir(dirp);
          		return -1;
       		}
 	}
-	printf("or not");
  	return 0;
 }
