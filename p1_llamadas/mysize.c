@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
             return -1;
         }
         
-	/*filesize is set to the output of the function lseek, which returns the size of the file. SEEK_END sets the offset to the size of the file plus offset bytes and in this case the offset bytes is 0. If lseek results in a negative integer, an error message is printed and -1 returned. Otherwise, the file is closed and the file name and file size are printed.*/
+	/*filesize is set to the output of lseek, which returns the size of the file. SEEK_END sets the offset to the size of the file plus offset bytes and in this case the offset bytes is 0. If lseek results in a negative integer, an error message is printed and -1 returned. Otherwise, the file is closed and the file name and file size are printed.*/
         if((fileSize=lseek(fd,0,SEEK_END)) < 0) {
             perror("seek error");
             return -1;
