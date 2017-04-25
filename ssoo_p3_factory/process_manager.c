@@ -27,6 +27,8 @@ void *PrintHello(void *threadid)
 }*/
 
 int toMove, beltID;
+pthread_mutex_t mutex;
+pthread_cond_t non_empty, non_full;
 
 /*The helper method returns 1 if parameter is number. Otherwise, it returns 0.*/
 int isInt(const char param[]){
@@ -58,8 +60,14 @@ void * producer(void *arg){
         else {
             x.last = 0;
         }
+        pthread_mutex_lock(&mutex);
+        while(queue_full()) {
+            pthread_cond_wait(&non_full, &mutex);
+        }
         queue_put(&x);
         printf("[OK] [queue] Introduced element with id: %d in belt %d.\n", i, beltID);
+        pthread_cond_signal(&non_empty);
+        pthread_mutex_unlock(&mutex);
     }
     printf("[OK] [process_manager] Process_manager with id: %d has produced %d elements.\n", beltID, toMove);
     pthread_exit(0);
@@ -69,17 +77,17 @@ void * consumer(void *arg){
     // consumer consumes all elements its responsible for and remove from belt
     int j;
     for (j = 0; j < toMove; j++) {
+        pthread_mutex_lock(&mutex);
+        while (queue_empty()) {
+            pthread_cond_wait(&non_empty, &mutex);
+        }
         queue_get();
         printf("[OK] [queue] Obtained element with id: %d in belt %d.\n", j, beltID);
+        pthread_cond_signal(&non_full);
+        pthread_mutex_unlock(&mutex);
     }
     pthread_exit(0);
 }
-
-
-// argv[1] = id
-// argv[2] = char pointer representing semaphore name
-// argv[3] = max size of belt
-// argv[4] = no. products to move
 
 int main (int argc, const char * argv[] ){
     // Check arguments validity
@@ -100,6 +108,10 @@ int main (int argc, const char * argv[] ){
     printf("[OK] [process_manager] Process_manager with id: %s waiting to produce %s elements.\n", argv[1], argv[4]);
     //sem_wait(&s);
     
+    pthread_mutex_init(&mutex, NULL);
+    pthread_cond_init(&non_full, NULL);
+    pthread_cond_init(&non_empty, NULL);
+    
     // create belt of max size argv[3]
     queue_init(atoi(argv[3]));
     printf("[OK] [process_manager] Belt with id: %s has been created with a maximum of %s elements.\n", argv[1], argv[3]);
@@ -115,6 +127,9 @@ int main (int argc, const char * argv[] ){
     
     
     // Destroy all associated resources
+    pthread_mutex_destroy(&mutex);
+    pthread_cond_destroy(&non_full);
+    pthread_cond_destroy(&non_empty);
     queue_destroy();
     //sem_post(&s);
     return 0;
