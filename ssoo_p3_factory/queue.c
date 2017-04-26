@@ -32,6 +32,7 @@ int queue_put(struct element* x) {
         pthread_cond_wait(&non_full, &mutex);
     }
     buffer[pos++] = *x;
+    printf("[OK] [queue] Introduced element with id: %d in belt %d.\n", x->num_edition, x->id_belt);
     pthread_cond_signal(&non_empty);
     pthread_mutex_unlock(&mutex);
     return 0;
@@ -44,8 +45,9 @@ struct element* queue_get(void) {
     while (queue_empty()) {
         pthread_cond_wait(&non_empty, &mutex);
     }
-    struct element *elem = malloc(sizeof(struct element));
-    elem = &buffer[pos--];
+    struct element * elem = &(buffer[pos-1]);
+    pos--;
+    printf("[OK] [queue] Obtained element with id: %d in belt %d.\n", elem->num_edition, elem->id_belt);
     pthread_cond_signal(&non_full);
     pthread_mutex_unlock(&mutex);
 	return elem;

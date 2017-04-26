@@ -25,7 +25,7 @@
 
 int main (int argc, const char * argv[]){
     char buf[BUFFER_SIZE];
-    int maxNumPM, idPM, sizeBelt, numOfElem;
+    int maxNumPM;
     int fd,n;
     
     /*If the number of arguments is less than two, we print an error message and return -1.*/
@@ -35,7 +35,7 @@ int main (int argc, const char * argv[]){
     }
     
     /*If the value of the file descriptor returned from opening the given file is less than 0, we print an error message and return -1.*/
-    if ((fd=open(argv[1],O_RDONLY,0666))<0) {
+    if ((fd=open(argv[1],O_RDONLY,0777))<0) {
         perror("[ERROR][factory_manager] Invalid file2\n");
         return -1;
     }
@@ -76,16 +76,26 @@ int main (int argc, const char * argv[]){
     /*For each process manager, a semaphore is created and the helper method createProcessManager is called.*/
     int index2=2;
     while(strcmp(&buf[index2],"\0")!=0){
-        char name[100];
+
+        int idN= atoi(&buf[index2]);
+        int sizeOfBeltN= atoi(&buf[index2+2]);
+        int numElemN= atoi(&buf[index2+4]);
+        
+        char id[100], sizeOfBelt[100], numElem[100], name[100];
+
+        sprintf(id, "%d", idN);
+        sprintf(sizeOfBelt, "%d", sizeOfBeltN);
+        sprintf(numElem, "%d", numElemN);
         sprintf(name, "/%d", index2);
-        sem_t *s;
+        
+        sem_t *s = sem_open(name, O_CREAT, 0777, 1);
         if(index2==2){
             s = sem_open(name, O_CREAT, 0644, 1);
         } else {
             s = sem_open(name, O_CREAT, 0644, 0);
         }
         
-        int pid, status;
+        int pid, status, wstatus, swait;
 
         pid = fork();
         switch(pid) {
@@ -93,50 +103,27 @@ int main (int argc, const char * argv[]){
                 perror("Fork error");
                 exit(-1);
             case 0:
-                //printf("pid %d", getpid());
-                printf("here instead");
-                /*char **argv;
-                argv[0] = ("./process");
-                argv[1] =&(buf[index2]);
-                argv[2] =(name);
-                argv[3] =&(buf[index2+2]);
-                argv[4] =&(buf[index2+4]);
-                argv[5]= NULL;
-                
-                
-                //printf("%c", cIndex2);
-                //printf("\n");
-                
-                //int resultExec = (execv("process", argv));
-                //printf("[OK][factory_manager] Process_manager with id <id> has been created.");
-                
-                if (resultExec ==-1){
-                    perror("[ERROR][factory_manager] Process_manager with id <id> has finished with errors.");
-                    exit(-1);
-                } else {
-                    printf("[OK][factory_manager] Process_manager with id <id> has finished.");
-                    sprintf(name, "/%d", index2+6);
-                    s=sem_open(name, O_EXCL, 0644, 0);
-                    sem_post(s);
-                    exit(0);
-                }*/
-                //printf("my val %d",atoi(&buf[index2]));
-                execl("./process", &buf[index2], name, &buf[index2+2], &buf[index2+4], (char *) NULL);
+                sem_wait(s);
+                execl("./process", id, name, sizeOfBelt, numElem, (char *) NULL);
                 //perror("error in exec");
                 break;
             default:
-                if (waitpid(pid,&status,0) > -1){
-                    printf("[OK][factory_manager] Process_manager with id %c has finished.\n", buf[index2]);
+                wstatus = waitpid(pid,&status,0);
+                if (wstatus > -1){
+                    printf("[OK] [factory_manager] Process_manager with id %s has finished.\n", id);
                 } else {
-                    printf("[ERROR][factory_manager] Process_manager with id %c has finished with errors.\n", buf[index2]);
+                    printf("[ERROR][factory_manager] Process_manager with id %s has finished with errors.\n", id);
                 }
+                sem_close(s);
                 sprintf(name, "/%d", index2+6);
-                s=sem_open(name, O_EXCL, 0644, 0);
+                s=sem_open(name, O_RDWR);
                 sem_post(s);
+                
         }
         index2 = index2+6;
         
-    }	
+    }
+    
     
     printf("Finishing\n");
     return 0;

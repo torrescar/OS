@@ -59,7 +59,6 @@ void * producer(void *arg){
             x.last = 0;
         }
         queue_put(&x);
-        printf("[OK] [queue] Introduced element with id: %d in belt %d.\n", i, beltID);
     }
     printf("[OK] [process_manager] Process_manager with id: %d has produced %d elements.\n", beltID, toMove);
     pthread_exit(0);
@@ -70,7 +69,6 @@ void * consumer(void *arg){
     int j;
     for (j = 0; j < toMove; j++) {
         queue_get();
-        printf("[OK] [queue] Obtained element with id: %d in belt %d.\n", j, beltID);
     }
     pthread_exit(0);
 }
@@ -83,28 +81,32 @@ void * consumer(void *arg){
 
 int main (int argc, const char * argv[] ){
     // Check arguments validity
-    if (!isInt(&argv[0][0]) || !isInt(&argv[2][0]) || !isInt(&argv[3][0])) {
+    if (!isInt(argv[0]) || !isInt(argv[2]) || !isInt(argv[3])) {
         printf("[ERROR][process_manager] Arguments not valid\n");
-        printf("argv0 %c\n", argv[0][0]);
-        printf("argv2 %c\n", argv[2][0]);
-        printf("argv3 %c\n", argv[3][0]);
+        printf("argv0 %s\n",argv[0]);
+        printf("argv1 %s\n",argv[1]);
+        printf("argv2 %s\n", argv[2]);
+        printf("argv3 %s\n", argv[3]);
+        return -1;
     }
-    toMove = atoi(&argv[3][0]);
-    beltID = atoi(&argv[0][0]);
+    toMove = atoi(argv[3]);
+    beltID = atoi(argv[0]);
     
 	// Wait until semaphore (argv[2]) is unlocked
-    sem_t *s = sem_open(argv[1],0);
+    sem_t *s = sem_open(argv[2], O_RDWR);
     if (s == SEM_FAILED) {
-        printf("[ERROR][process_manager] Arguments not valid");
+        printf("[ERROR][process_manager] Arguments not valid\n");
+        printf("argv1 %s\n",argv[1]);
+        perror("Sem error:");
+        return -1;
     }
     //sem_t *s = sem_open("sem", O_CREAT, 0644, 1);
     
-    printf("[OK] [process_manager] Process_manager with id: %c waiting to produce %c elements.\n", argv[0][0], argv[3][0]);
-    sem_wait(s);
+    printf("[OK] [process_manager] Process_manager with id: %s waiting to produce %s elements.\n", argv[0], argv[3]);
     
     // create belt of max size argv[3]
-    queue_init(atoi(&argv[2][0]));
-    printf("[OK] [process_manager] Belt with id: %c has been created with a maximum of %c elements.\n", argv[0][0], argv[2][0]);
+    queue_init(atoi(argv[2]));
+    printf("[OK] [process_manager] Belt with id: %s has been created with a maximum of %s elements.\n", argv[0], argv[2]);
     
     // create two threads:
     pthread_t prod, cons;
@@ -118,6 +120,7 @@ int main (int argc, const char * argv[] ){
     
     // Destroy all associated resources
     queue_destroy();
+    sem_post(s);
     return 0;
 	
 }
