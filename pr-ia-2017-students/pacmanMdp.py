@@ -29,18 +29,18 @@ class PacmanMdp(mdp.MarkovDecisionProcess):
 
 
         # Uncomment to get the full vector of state features
-        #    self.stateFeatures=['posX','posY','IncFoodX','IncFoodY','IncGhostX','IncGhostY','foodX','foodY','wallsW','wallsH','GhostDist','ClosestGhostX','ClosestGhostY','ClosestGhostDist','GhostPos']
+        # self.stateFeatures=['posX','posY','IncFoodX','IncFoodY','IncGhostX','IncGhostY','foodX','foodY','wallsW','wallsH','GhostDist','ClosestGhostX','ClosestGhostY','ClosestGhostDist','GhostPos']
 
         # Default State features
         self.stateFeatures=['posX','posY','IncFoodX','IncFoodY','IncGhostX','IncGhostY']
 
         # Transition function (data structure required for the transition function)
         #*** YOUR CODE STARTS HERE ***"
-        
+       
         # This variable MUST be used to reference your transition table so
         # it can be saved and loaded from file
 
-        self.transitionTable=None
+        self.transitionTable = {}
         
         #"*** YOUR CODE FINISHES HERE ***"
 
@@ -139,8 +139,13 @@ class PacmanMdp(mdp.MarkovDecisionProcess):
 
         #"*** YOUR CODE STARTS HERE ***"
 
-        util.raiseNotDefined()
-        
+        #util.raiseNotDefined()
+ 	if state not in self.transitionTable:
+	    self.transitionTable[state] = {}
+	if action not in self.transitionTable[state]:
+ 	    self.transitionTable[state][action] = util.Counter()
+        self.transitionTable[state][action][nextstate] += 1
+
         #"*** YOUR CODE FINISHES HERE ***"
 
     def getPossibleActions(self, state):
@@ -268,8 +273,11 @@ class PacmanMdp(mdp.MarkovDecisionProcess):
 
         #"*** YOUR CODE STARTS HERE ***"
 
-        util.raiseNotDefined()
-
+        #util.raiseNotDefined()	
+	nextStatesWithProbs = self.transitionTable[state][action]	
+	total = nextStatesWithProbs.totalCount()
+	successors = [(nextState, float(times)/float(total)) for nextState,times in nextStatesWithProbs.iteritems()]
+	
         #"*** YOUR CODE FINISHES HERE ***"
 
         return successors
