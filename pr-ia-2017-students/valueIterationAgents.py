@@ -79,12 +79,13 @@ class ValueIterationAgent(ValueEstimationAgent):
         
         #util.raiseNotDefined()
         
+	if self.mdp.isTerminal(state):
+	    return None
+	
+	qs = util.Counter()
+
         actions = self.mdp.getPossibleActions(state)
-        if len(actions) == 0:
-            return None
-        
-        qs = util.Counter()
-        
+                
         for a in actions:
             qs[a] = self.computeQValueFromValues(state, a)
             #print "action %s, q %d" % (a, qs[a])
@@ -111,7 +112,7 @@ class ValueIterationAgent(ValueEstimationAgent):
         #util.raiseNotDefined()
         
         #print "states", states
-        goal = [state for state in states if self.mdp.isTerminal(state)][0]
+        #goal = [state for state in states if self.mdp.isTerminal(state)][0]
         #print "goal", goal
         
         newQs = util.Counter()
@@ -119,18 +120,14 @@ class ValueIterationAgent(ValueEstimationAgent):
         prevV = 0
         currentV = 0
         for i in range(1, self.iterations+1):
-            #print "t=",i
             for s in states:
-                #print "state",s
-                if s != goal:
+                if not self.mdp.isTerminal(s):
                     action = self.computeActionFromValues(s)
-                    newQs[s] = self.computeQValueFromValues(s, action)
-                    #self.values[s] = self.computeQValueFromValues(s, action)
-                    #print "V((%d, %d)) = %d for action %s" % (s[0], s[1], self.values[s], action)
+                    newQs[s] = self.getQValue(s, action)
                     prevV = currentV
                     currentV = self.getValue(s)
             for s in states:
-                if s != goal:
+                if not self.mdp.isTerminal(s):
                     self.values[s] = newQs[s]
         print "Final delta:", abs(currentV - prevV)
     

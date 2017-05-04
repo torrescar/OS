@@ -93,12 +93,37 @@ class PacmanMdp(mdp.MarkovDecisionProcess):
 
         # Gets all features
         fullState_values,fullState_names = self.featExtractor.getFeatures(stateMap)
-        
+
         # Skip features not present in the complete list even if selected
         state_names=tuple (n for n in self.stateFeatures if n in fullState_names)
         state=tuple (fullState_values[fullState_names.index(n)] for n in state_names)
 
-        
+	
+	good = {}
+	for s in state_names:
+	    good[s] = True
+	
+	ghostX = fullState_values[fullState_names.index("ClosestGhostX")]
+	ghostY = fullState_values[fullState_names.index("ClosestGhostY")]
+
+	myX = fullState_values[fullState_names.index("posX")]
+	myY = fullState_values[fullState_names.index("posY")]
+
+	ghostFeatures = ["ClosestGhostX", "ClosestGhostY", "ClosestGhostDist", "GhostDist", "IncGhostX", "IncGhostY"]
+
+	if abs(ghostX - myX) > 1 or abs(ghostY - myY) > 2:
+	    for f in ghostFeatures:
+		good[f] = False
+
+	foodY = fullState_values[fullState_names.index("foodY")]
+
+	if abs(foodY - myY) < 1:
+	    good["foodY"] = False
+	
+
+	state_names = tuple (n for n in state_names if good[n])
+	state=tuple (fullState_values[fullState_names.index(n)] for n in state_names)
+
         return state,state_names
     
     def addStateLow(self, stateH, stateMap):
@@ -274,8 +299,14 @@ class PacmanMdp(mdp.MarkovDecisionProcess):
         #"*** YOUR CODE STARTS HERE ***"
 
         #util.raiseNotDefined()	
+	if state not in self.transitionTable: 
+	     return successors
+        if action not in self.transitionTable[state]:
+	     return successors
+
 	nextStatesWithProbs = self.transitionTable[state][action]	
 	total = nextStatesWithProbs.totalCount()
+
 	successors = [(nextState, float(times)/float(total)) for nextState,times in nextStatesWithProbs.iteritems()]
 	
         #"*** YOUR CODE FINISHES HERE ***"
