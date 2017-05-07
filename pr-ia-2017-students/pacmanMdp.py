@@ -99,30 +99,37 @@ class PacmanMdp(mdp.MarkovDecisionProcess):
         state=tuple (fullState_values[fullState_names.index(n)] for n in state_names)
 
 	
-	good = {}
-	for s in state_names:
-	    good[s] = True
-	
-	ghostX = fullState_values[fullState_names.index("ClosestGhostX")]
-	ghostY = fullState_values[fullState_names.index("ClosestGhostY")]
+        good = {}
+        for s in state_names:
+            good[s] = True
+        
+        ghostX = fullState_values[fullState_names.index("ClosestGhostX")]
+        ghostY = fullState_values[fullState_names.index("ClosestGhostY")]
 
-	myX = fullState_values[fullState_names.index("posX")]
-	myY = fullState_values[fullState_names.index("posY")]
+        myX = fullState_values[fullState_names.index("posX")]
+        myY = fullState_values[fullState_names.index("posY")]
 
-	ghostFeatures = ["ClosestGhostX", "ClosestGhostY", "ClosestGhostDist", "GhostDist", "IncGhostX", "IncGhostY"]
+        ghostFeatures = ["ClosestGhostX", "ClosestGhostY", "ClosestGhostDist", "GhostDist", "IncGhostX", "IncGhostY"]
 
-	if abs(ghostX - myX) > 1 or abs(ghostY - myY) > 2:
-	    for f in ghostFeatures:
-		good[f] = False
+        if abs(ghostX - myX) > 2 or abs(ghostY - myY) > 2:
+            for f in ghostFeatures:
+            good[f] = False
 
-	foodY = fullState_values[fullState_names.index("foodY")]
+        foodY = fullState_values[fullState_names.index("foodY")]
 
-	if abs(foodY - myY) < 1:
-	    good["foodY"] = False
-	
+        if abs(foodY - myY) < 1:
+            good["foodY"] = False
+        
+        filtered_state = tuple ()
+        filtered_state_names = tuple()
+        
+        for i in range(len(state_names)):
+            if good[state_names[i]]:
+                filtered_state_names.append(state_names[i])
+                filtered_state.append(state[i])
 
-	state_names = tuple (n for n in state_names if good[n])
-	state=tuple (fullState_values[fullState_names.index(n)] for n in state_names)
+        state_names = filtered_state_names
+        state=tuple filtered_state
 
         return state,state_names
     
